@@ -5,11 +5,13 @@ class Person {
         this.status = st;
         this.vx = 0;
         this.vy = 0;
-        this.x = Math.random() * b.width;
-        this.y = Math.random() * b.height;
+        this.x = b.x + Math.random() * b.width;
+        this.y = b.y + Math.random() * b.height;
         this.count = 0;
         this.recovery = this.randomIntFromInterval(min, max);
         this.quarantine = q;
+        this.effect = false;
+        this.effectCount = 10;
     }
 
     dist(p2) {
@@ -23,30 +25,46 @@ class Person {
 		}
 		var result = (p >= Math.random());
 		if (result) {
-			this.status = 2;
+            this.status = 2;
+            this.effect = true;
 		}
 		return result;
     }
 
     randomWalk() {
-        var ax = 0.01 * (2 * Math.random() - 1);
-		var ay = 0.01 * (2 * Math.random() - 1);
+        var ax = 0.03 * (2 * Math.random() - 1);
+        var ay = 0.03 * (2 * Math.random() - 1);
+        /*
+        if (this.status == 2) {
+            ax = 1 * (2 * Math.random() - 1);
+            ay = 1 * (2 * Math.random() - 1);
+        } else {
+            ax = 0.03 * (2 * Math.random() - 1);
+            ay = 0.03 * (2 * Math.random() - 1);
+            
+        }
+        */
 		this.vx += ax;
 		this.vy += ay;
 		if ((this.x + this.vx) > (this.bound.x + this.bound.width)) {
-			this.x = this.x + this.vx - this.bound.width;
-		} else {
+            this.x = this.x + this.vx - this.bound.width;
+        } else if ((this.x + this.vx) < this.bound.x) {
+            this.x = this.bound.x + this.bound.width - (this.bound.x - this.vx - this.x);
+        } else {
 			this.x += this.vx;
 		}
 		if ((this.y + this.vy) > (this.bound.y + this.bound.height)) {
-			this.y = this.y + this.vy - this.bound.height;
+            this.y = this.y + this.vy - this.bound.height;
+        } else if ((this.y + this.vy) < this.bound.y) {
+            this.y = this.bound.y + this.bound.height - (this.bound.y - this.vy - this.y);
 		} else {
 			this.y += this.vy;
 		}
 		if (this.status == 2) {
 			this.count += 1;
 			if (this.count == this.recovery) {
-				this.status = 3;
+                this.status = 3;
+                
 				return true;
 			}
 		}
@@ -56,7 +74,12 @@ class Person {
 
     moveTowards(rect, speed) {
         if (rect.contains(this)) {
-            this.bound = rect;
+            if (this.bound != rect) {
+                this.bound = rect;
+                this.vx = 0;
+                this.vy = 0;
+            }
+            
             this.randomWalk();
 			return;
 		}
@@ -66,7 +89,39 @@ class Person {
 		this.vx = speed * cosA;
 		this.vy = speed * sinA;
 		this.x += this.vx;
-		this.y += this.vy;
+        this.y += this.vy;
+        if (this.status == 2) {
+			this.count += 1;
+			if (this.count == this.recovery) {
+                this.status = 3;
+                this.vx = 0;
+                this.vy = 0;
+				return true;
+			}
+		}
+		
+		return false;
+    }
+
+    moveAway(rect, speed) {
+        var dist = Math.sqrt(Math.pow(rect.y + rect.height / 2 - this.y, 2) + Math.pow(rect.x + rect.width / 2 - this.x, 2));
+		var sinA = (rect.y + rect.height / 2 - this.y) / dist;
+		var cosA = (rect.x + rect.width / 2 - this.x) / dist;
+		this.vx = -speed * cosA;
+		this.vy = -speed * sinA;
+		this.x += this.vx;
+        this.y += this.vy;
+        if (this.status == 2) {
+			this.count += 1;
+			if (this.count == this.recovery) {
+                this.status = 3;
+                this.vx = 0;
+                this.vy = 0;
+				return true;
+			}
+		}
+		
+		return false;
     }
 
     show() {
@@ -77,6 +132,14 @@ class Person {
         } else if (this.status == 2) {
             stroke('red');
             point(this.x, this.y);
+            if (this.effect) {
+                ++this.effectCount;
+                strokeWeight(1);
+                circle(this.x, this.y, 2 * this.effectCount)
+                if (this.effectCount == 50) {
+                    this.effect = false;
+                }
+            }
         } else if (this.status == 3) {
             stroke('grey');
             point(this.x, this.y);
@@ -242,6 +305,23 @@ class Rectangle {
         return edges <= (c.radius * c.radius);
     }
 
+    close(p) {
+        if (this.contains(p)) {
+            return true;
+        }
+        if ((Math.abs(this.x - p.x) <= 5) || (Math.abs(this.x + this.width - p.x) <= 5)) {
+            if ((p.y >= this.y) && (p.y <= this.y + this.height)) {
+                return true;
+            }
+            
+        }
+        if ((Math.abs(this.y - p.y) <= 5) || (Math.abs(this.y + this.height - p.y) <= 5)) {
+            if ((p.x >= this.x) && (p.x <= this.x + this.width)) {
+                return true;
+            }
+        }
+        return false;
+    }
     show() {
         noFill();
         stroke('green');
@@ -262,6 +342,13 @@ class Circle {
         return (dis <= (this.radius * this.radius));
     }
 
+    close(p) {
+        if (this.contains(p)) {
+            return true;
+        }
+        let dist = Math.sqrt(Math.pow(this.x - p.x, 2) + Math.pow(this.y - p.y, 2));
+        return (dist < this.radius + 5);
+    } 
     show() {
         noFill();
         stroke('green');

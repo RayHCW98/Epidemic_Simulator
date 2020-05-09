@@ -85,11 +85,15 @@ public class Person {
 		this.vy += ay;
 		if ((this.x + this.vx) > (this.bound.x + this.bound.width)) {
 			this.x = this.x + this.vx - this.bound.width;
+		} else if ((this.x + this.vx) < this.bound.x) {
+			this.x = this.bound.x + this.bound.width - (this.bound.x - this.x - this.vx);
 		} else {
 			this.x += this.vx;
 		}
 		if ((this.y + this.vy) > (this.bound.y + this.bound.height)) {
 			this.y = this.y + this.vy - this.bound.height;
+		} else if ((this.y + this.vy) < this.bound.y) {
+			this.y = this.bound.y + this.bound.height - (this.bound.y - this.y - this.vy);
 		} else {
 			this.y += this.vy;
 		}
@@ -107,6 +111,8 @@ public class Person {
 	
 	public void moveTowards(QuadTree.Rectangle rect, double speed) {
 		if (rect.contains(this)) {
+			this.bound = rect;
+			this.randomWalk();
 			return;
 		}
 		double dist = Math.sqrt(Math.pow(rect.y + rect.height / 2 - this.y, 2) + Math.pow(rect.x + rect.width / 2 - this.x, 2));

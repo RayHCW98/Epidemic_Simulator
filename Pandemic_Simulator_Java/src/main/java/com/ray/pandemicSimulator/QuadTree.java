@@ -215,7 +215,7 @@ public class QuadTree {
 		}
 		
 		public boolean intersects(Rectangle rect2) {
-			return ((this.x + this.width < rect2.x) || (this.x > rect2.x + rect2.width) || (this.y + this.height < rect2.y) || (this.y > rect2.y + rect2.height));
+			return !((this.x + this.width < rect2.x) || (this.x > rect2.x + rect2.width) || (this.y + this.height < rect2.y) || (this.y > rect2.y + rect2.height));
 		}
 		
 		@Override
