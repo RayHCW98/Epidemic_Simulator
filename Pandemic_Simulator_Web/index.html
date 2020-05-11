@@ -9,19 +9,129 @@
     body {
       padding: 0;
       margin: 0;
+      background-color: rgb(51, 51, 51);
     }
+    .slidecontainer {
+      width: 100%;
+    }
+    
+    
+    
   </style>
-  <script src="p5.js"></script>
+  <script src="libs/p5.js"></script>
+  <script src="libs/p5.sound.js"></script>
+  <script src="libs/p5.dom.js"></script>
   <script src="Pandemic_Simulator.js"></script>
-  <script src="p5.dom.js"></script>
-
-  
   <script src="sketch.js"></script>
   
   
 </head>
 
 <body>
+  <button onclick="qua()"> 
+    Quarantine Mode
+  </button> 
+  <button onclick="normal()"> 
+    Normal Mode
+  </button> 
+  <button onclick="reset()"> 
+    Reset
+  </button> 
+  <div class="slidecontainer">
+    <p style="color:white;">Contact Infection Probability: <span id="contactP"></span></p>
+    <input type="range" min="0" max="100" value="50" id="contactP_Range">
+
+    <p style="color:white;">Contact Infection Radius: <span id="contactR"></span></p>
+    <input type="range" min="0" max="10" value="5" id="contactR_Range">
+    
+    <p style="color:white;">Airborne Infection Probability: <span id="airborneP"></span></p>
+    <input type="range" min="0" max="100" value="50" id="airborneP_Range">
+
+    <p style="color:white;">Airborne Infection Radius: <span id="airborneR"></span></p>
+    <input type="range" min="0" max="100" value="10" id="airborneR_Range">
+
+    <p style="color:white;">Minimum Recovery Iteration: <span id="minR"></span></p>
+    <input type="range" min="0" max="5000" value="100" id="minR_Range">
+
+    <p style="color:white;">Maximum Recovery Iteration: <span id="maxR"></span></p>
+    <input type="range" min="0" max="5000" value="3000" id="maxR_Range">
+
+    <p style="color:white;">Initial Number of Healthy People: <span id="healthyN"></span></p>
+    <input type="range" min="0" max="1000" value="500" id="healthyN_Range">
+
+    <p style="color:white;">Initial Number of Infected People: <span id="infectedN"></span></p>
+    <input type="range" min="0" max="500" value="100" id="infectedN_Range">
+
+    <p style="color:white;">Initial Number of Recovered / Deceased People: <span id="immuneN"></span></p>
+    <input type="range" min="0" max="100" value="10" id="immuneN_Range">
+    
+  </div>
+  
+  <script>
+    
+    var sliderContactP = document.getElementById("contactP_Range");
+    var outputContactP = document.getElementById("contactP");
+    outputContactP.innerHTML = sliderContactP.value * 0.01;
+    sliderContactP.oninput = function() {
+      outputContactP.innerHTML = this.value * 0.01;
+    }
+
+    var sliderContactR = document.getElementById("contactR_Range");
+    var outputContactR = document.getElementById("contactR");
+    outputContactR.innerHTML = sliderContactR.value;
+    sliderContactR.oninput = function() {
+      outputContactR.innerHTML = this.value;
+    }
+
+    var sliderAirborneP = document.getElementById("airborneP_Range");
+    var outputAirborneP = document.getElementById("airborneP");
+    outputAirborneP.innerHTML = sliderAirborneP.value * 0.01;
+    sliderAirborneP.oninput = function() {
+      outputAirborneP.innerHTML = this.value * 0.01;
+    }
+
+    var sliderAirborneR = document.getElementById("airborneR_Range");
+    var outputAirborneR = document.getElementById("airborneR");
+    outputAirborneR.innerHTML = sliderAirborneR.value;
+    sliderAirborneR.oninput = function() {
+      outputAirborneR.innerHTML = this.value;
+    }
+
+    var sliderMinR = document.getElementById("minR_Range");
+    var outputMinR = document.getElementById("minR");
+    var sliderMaxR = document.getElementById("maxR_Range");
+    var outputMaxR = document.getElementById("maxR");
+    outputMinR.innerHTML = sliderMinR.value;
+    sliderMinR.oninput = function() {
+      outputMinR.innerHTML = this.value;
+    }
+    outputMaxR.innerHTML = sliderMaxR.value;
+    sliderMaxR.oninput = function() {
+      outputMaxR.innerHTML = this.value;
+    }
+
+    var sliderHealthyN = document.getElementById("healthyN_Range");
+    var outputHealthyN = document.getElementById("healthyN");
+    outputHealthyN.innerHTML = sliderHealthyN.value;
+    sliderHealthyN.oninput = function() {
+      outputHealthyN.innerHTML = this.value;
+    }
+
+    var sliderInfectedN = document.getElementById("infectedN_Range");
+    var outputInfectedN = document.getElementById("infectedN");
+    outputInfectedN.innerHTML = sliderInfectedN.value;
+    sliderInfectedN.oninput = function() {
+      outputInfectedN.innerHTML = this.value;
+    }
+
+    var sliderImmuneN = document.getElementById("immuneN_Range");
+    var outputImmuneN = document.getElementById("immuneN");
+    outputImmuneN.innerHTML = sliderImmuneN.value;
+    sliderImmuneN.oninput = function() {
+      outputImmuneN.innerHTML = this.value;
+    }
+    
+  </script>
 </body>
 
 </html>

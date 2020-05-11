@@ -80,8 +80,8 @@ class Person {
                 this.vy = 0;
             }
             
-            this.randomWalk();
-			return;
+            return this.randomWalk();
+			
 		}
 		var dist = Math.sqrt(Math.pow(rect.y + rect.height / 2 - this.y, 2) + Math.pow(rect.x + rect.width / 2 - this.x, 2));
 		var sinA = (rect.y + rect.height / 2 - this.y) / dist;
@@ -127,21 +127,21 @@ class Person {
     show() {
         strokeWeight(10);
         if (this.status == 1) {
-            stroke('green');
+            stroke(131, 175, 155);
             point(this.x, this.y);
         } else if (this.status == 2) {
-            stroke('red');
+            stroke(254, 67, 101);
             point(this.x, this.y);
             if (this.effect) {
                 ++this.effectCount;
-                strokeWeight(1);
+                strokeWeight(2);
                 circle(this.x, this.y, 2 * this.effectCount)
                 if (this.effectCount == 50) {
                     this.effect = false;
                 }
             }
         } else if (this.status == 3) {
-            stroke('grey');
+            stroke(249, 205, 173);
             point(this.x, this.y);
         }
     }
@@ -153,7 +153,9 @@ class Person {
     }
 
     randomIntFromInterval(min, max) {
-        return Math.floor(Math.random() * (max - min + 1) + min);
+        let minL = Math.min(min, max);
+        let maxL = Math.max(min, max);
+        return Math.floor(Math.random() * (maxL - minL + 1) + minL);
     }
 
     randomBoolean() {
@@ -172,7 +174,8 @@ class QuadTree {
     insert(p) {
         if (!this.bound.contains(p)) {
 			return false;
-		}
+        }
+        
 		if (this.people.size < this.capacity) {
 			this.people.add(p);
 			return true;
