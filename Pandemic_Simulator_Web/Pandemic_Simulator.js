@@ -12,6 +12,7 @@ class Person {
         this.quarantine = q;
         this.effect = false;
         this.effectCount = 10;
+        this.attackTrigger = false;
     }
 
     dist(p2) {
@@ -32,18 +33,14 @@ class Person {
     }
 
     randomWalk() {
+        if (this.attackTrigger) {
+            this.attackTrigger = false;
+            this.vx = 0;
+            this.vy = 0;
+        }
         var ax = 0.03 * (2 * Math.random() - 1);
         var ay = 0.03 * (2 * Math.random() - 1);
-        /*
-        if (this.status == 2) {
-            ax = 1 * (2 * Math.random() - 1);
-            ay = 1 * (2 * Math.random() - 1);
-        } else {
-            ax = 0.03 * (2 * Math.random() - 1);
-            ay = 0.03 * (2 * Math.random() - 1);
-            
-        }
-        */
+        
 		this.vx += ax;
 		this.vy += ay;
 		if ((this.x + this.vx) > (this.bound.x + this.bound.width)) {
@@ -70,6 +67,30 @@ class Person {
 		}
 		
 		return false;
+    }
+
+    attack(p, speed) {
+        this.attackTrigger = true;
+        if ((this.x == p.x) && (this.y == p.y)) {
+            return this.randomWalk();
+        }
+        var dist = Math.sqrt(Math.pow(this.x - p.x, 2) + Math.pow(this.y - p.y, 2));
+        var sinA = (p.y - this.y) / dist;
+        var cosA = (p.x - this.x) / dist;
+        this.vx = speed * cosA;
+        this.vy = speed * sinA;
+        this.x += this.vx;
+        this.y += this.vy;
+        if (this.status == 2) {
+			this.count += 1;
+			if (this.count == this.recovery) {
+                this.status = 3;
+                this.vx = 0;
+                this.vy = 0;
+				return true;
+			}
+        }
+        return false;
     }
 
     moveTowards(rect, speed) {

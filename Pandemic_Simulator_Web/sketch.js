@@ -12,10 +12,15 @@ var minL;
 var maxL;
 var data;
 var quarantine = false;
+var norma = true;
+var zombie = false;
 var iteration;
 var healthyN;
 var infectedN;
 var immuneN;
+var quaSpeed;
+var attackRadius;
+var attackSpeed;
 
 function setup() {
 
@@ -35,12 +40,16 @@ function reset() {
     airborneR = sliderAirborneR.value;
     airborneP = sliderAirborneP.value * 0.01;
 
-    minL = sliderMinR.value;
-    maxL = sliderMaxR.value;
+    minL = Math.floor(sliderMinR.value);
+    maxL = Math.floor(sliderMaxR.value);
 
     healthyN = sliderHealthyN.value;
     infectedN = sliderInfectedN.value;
     immuneN = sliderImmuneN.value;
+
+    quaSpeed = sliderQuarantineS.value;
+    attackRadius = sliderAttackR.value;
+    attackSpeed = sliderAttackS.value;
 
     iteration = 0;
     data = new Array();
@@ -95,7 +104,7 @@ function draw() {
             //p.moveTowards(area, 1);
         }
         for (let p of infected) {
-            if (p.moveTowards(rec, 1)) {
+            if (p.moveTowards(rec, quaSpeed)) {
                 p.bound = area;
                 immune.add(p);
                 
@@ -119,29 +128,30 @@ function draw() {
             qt2.insert(p);
         }
 
-        let newlyInfected = new Set();
-        for (let p of infected) {
-            let suspect = qt.query(new Circle(p.x, p.y, airborneR), 1, "Circle");
-            for (let q of suspect) {
-                if (q.bound != p.bound) {
-                    suspect.delete(q);
+        if (healthy.size != 0) {
+            let newlyInfected = new Set();
+            for (let p of infected) {
+                let suspect = qt.query(new Circle(p.x, p.y, airborneR), 1, "Circle");
+                for (let q of suspect) {
+                    if (q.bound != p.bound) {
+                        suspect.delete(q);
+                    }
+                }
+                for (let q of suspect) {
+                    if (q.infect(airborneP)) {
+                        newlyInfected.add(q);
+                        
+                    } else if ((p.dist(q) <= contactR) && (q.infect(contactP))) {
+                        newlyInfected.add(q);
+                        
+                    }
                 }
             }
-            for (let q of suspect) {
-                if (q.infect(airborneP)) {
-                    newlyInfected.add(q);
-                    
-                } else if ((p.dist(q) <= contactR) && (q.infect(contactP))) {
-                    newlyInfected.add(q);
-                    
-                }
+            for (let p of newlyInfected) {
+                healthy.delete(p);
+                infected.add(p);
             }
         }
-        for (let p of newlyInfected) {
-            healthy.delete(p);
-            infected.add(p);
-        }
-        
         if (infected.size != 0) {
             if (data.length < 900) {
                 data.push([healthy.size, infected.size, immune.size]);
@@ -160,7 +170,7 @@ function draw() {
         qt.show();
         
         qt2.show();
-    } else if (!quarantine) {
+    } else if (norma) {
         var qt = new QuadTree(area, 50);
         
         for (let p of healthy) {
@@ -192,20 +202,22 @@ function draw() {
             qt.insert(p);
         }
 
-        let newlyInfected = new Set();
-        for (let p of infected) {
-            let suspect = qt.query(new Circle(p.x, p.y, airborneR), 1, "Circle");
-            for (let q of suspect) {
-                if (q.infect(airborneP)) {
-                    newlyInfected.add(q);
-                } else if ((p.dist(q) <= contactR) && (q.infect(contactP))) {
-                    newlyInfected.add(q);
+        if (healthy.size != 0) {
+            let newlyInfected = new Set();
+            for (let p of infected) {
+                let suspect = qt.query(new Circle(p.x, p.y, airborneR), 1, "Circle");
+                for (let q of suspect) {
+                    if (q.infect(airborneP)) {
+                        newlyInfected.add(q);
+                    } else if ((p.dist(q) <= contactR) && (q.infect(contactP))) {
+                        newlyInfected.add(q);
+                    }
                 }
             }
-        }
-        for (let p of newlyInfected) {
-            healthy.delete(p);
-            infected.add(p);
+            for (let p of newlyInfected) {
+                healthy.delete(p);
+                infected.add(p);
+            }
         }
         
         if (infected.size != 0) {
@@ -216,16 +228,91 @@ function draw() {
                 data.push([healthy.size, infected.size, immune.size]);
             }
         }   
-        /*
-        let h = healthy.size;
-        let infe = infected.size;
-        let imm = immune.size;
-
-        data.push([h, infe, imm]);
-        */
         qt.show();
         
         
+    } else if (zombie) {
+        var qt = new QuadTree(area, 50);
+        
+        for (let p of healthy) {
+            p.randomWalk();
+            //p.moveTowards(rec, 1);
+            //p.moveTowards(area, 1);
+        }
+        for (let p of immune) {
+            p.randomWalk();
+            //p.moveTowards(rec, 1);
+            //p.moveTowards(area, 1);
+        }
+
+        for (let p of healthy) {
+            qt.insert(p);
+        }
+        for (let p of immune) {
+            qt.insert(p);
+        }
+
+        for (let p of infected) {
+            if (healthy.size != 0) {
+                let targets = qt.query(new Circle(p.x, p.y, attackRadius), 1, "Circle");
+                if (targets.size == 0) {
+                    if (p.randomWalk()) {
+                        immune.add(p);
+                        qt.insert(p);
+                        infected.delete(p);
+                    }
+                } else {
+                    for (let q of targets) {
+                        if (p.attack(q, attackSpeed)) {
+                            immune.add(p);
+                            qt.insert(p);
+                            infected.delete(p);
+                        }
+                        break;
+                    }
+                }
+            } else {
+                if (p.randomWalk()) {
+                    immune.add(p);
+                    qt.insert(p);
+                    infected.delete(p);
+                }
+            }
+        }
+
+        
+        for (let p of infected) {
+            qt.insert(p);
+        }
+
+        if (healthy.size != 0) {
+            let newlyInfected = new Set();
+            for (let p of infected) {
+                let suspect = qt.query(new Circle(p.x, p.y, airborneR), 1, "Circle");
+                for (let q of suspect) {
+                    if (q.infect(airborneP)) {
+                        newlyInfected.add(q);
+                    } else if ((p.dist(q) <= contactR) && (q.infect(contactP))) {
+                        newlyInfected.add(q);
+                    }
+                }
+            }
+            for (let p of newlyInfected) {
+                healthy.delete(p);
+                infected.add(p);
+            }
+        }
+        
+        if (infected.size != 0) {
+            if (data.length < 900) {
+                data.push([healthy.size, infected.size, immune.size]);
+            } else {
+                data.shift();
+                data.push([healthy.size, infected.size, immune.size]);
+            }
+        }   
+        
+        qt.show();
     }
 
     
@@ -264,14 +351,28 @@ function qua() {
         return;
     }
     quarantine = true;
+    norma = false;
+    zombie = false;
     reset();
 }
 
 function normal() {
-    if (quarantine == false) {
+    if (norma == true) {
         return;
     }
     quarantine = false;
+    norma = true;
+    zombie = false;
+    reset();
+}
+
+function zomb() {
+    if (zombie == true) {
+        return;
+    }
+    quarantine = false;
+    norma = false;
+    zombie = true;
     reset();
 }
 

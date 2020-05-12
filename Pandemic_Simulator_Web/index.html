@@ -11,10 +11,29 @@
       margin: 0;
       background-color: rgb(51, 51, 51);
     }
-    .slidecontainer {
-      width: 100%;
+
+    div.slidecontainer {
+      position: absolute;
+      left: 1000px;
     }
-    
+    div.buttoncontainer {
+      position: absolute;
+      left: 600px;
+    }
+    /*
+    div.slidecontainer {
+      
+      position: fixed;
+      top: 0px;
+      right: 20px;
+  
+    }
+    div.buttoncontainer {
+      position: fixed;
+      top: 0px;
+      right: 400px;
+    }
+    */
     
     
   </style>
@@ -28,15 +47,21 @@
 </head>
 
 <body>
-  <button onclick="qua()"> 
-    Quarantine Mode
-  </button> 
-  <button onclick="normal()"> 
-    Normal Mode
-  </button> 
-  <button onclick="reset()"> 
-    Reset
-  </button> 
+  <div class = "buttoncontainer">
+    <button onclick="qua()"> 
+      Quarantine Mode
+    </button> 
+    <button onclick="normal()"> 
+      Normal Mode
+    </button> 
+    <button onclick="zomb()">
+      Zombie Mode
+    </button>
+    <button onclick="reset()"> 
+      Reset
+    </button> 
+  </div>
+  
   <div class="slidecontainer">
     <p style="color:white;">Contact Infection Probability: <span id="contactP"></span></p>
     <input type="range" min="0" max="100" value="50" id="contactP_Range">
@@ -62,13 +87,22 @@
     <p style="color:white;">Initial Number of Infected People: <span id="infectedN"></span></p>
     <input type="range" min="0" max="500" value="100" id="infectedN_Range">
 
-    <p style="color:white;">Initial Number of Recovered / Deceased People: <span id="immuneN"></span></p>
+    <p style="color:white;">Initial Number of Immune People: <span id="immuneN"></span></p>
     <input type="range" min="0" max="100" value="10" id="immuneN_Range">
+
+    <p style="color:white;">Quarantine Speed: <span id="quarantineS"></span></p>
+    <input type="range" min="1" max="20" value="1" id="quarantineS_Range">
+
+    <p style="color:white;">Zombie Attack Radius: <span id="attackR"></span></p>
+    <input type="range" min="10" max="50" value="20" id="attackR_Range">
+
+    <p style="color:white;">Zombie Attack Speed: <span id="attackS"></span></p>
+    <input type="range" min="1" max="20" value="5" id="attackS_Range">
     
   </div>
   
   <script>
-    
+
     var sliderContactP = document.getElementById("contactP_Range");
     var outputContactP = document.getElementById("contactP");
     outputContactP.innerHTML = sliderContactP.value * 0.01;
@@ -129,6 +163,27 @@
     outputImmuneN.innerHTML = sliderImmuneN.value;
     sliderImmuneN.oninput = function() {
       outputImmuneN.innerHTML = this.value;
+    }
+
+    var sliderQuarantineS = document.getElementById("quarantineS_Range");
+    var outputQuarantineS = document.getElementById("quarantineS");
+    outputQuarantineS.innerHTML = sliderQuarantineS.value;
+    sliderQuarantineS.oninput = function() {
+      outputQuarantineS.innerHTML = this.value;
+    }
+
+    var sliderAttackR = document.getElementById("attackR_Range");
+    var outputAttackR = document.getElementById("attackR");
+    outputAttackR.innerHTML = sliderAttackR.value;
+    sliderAttackR.oninput = function() {
+      outputAttackR.innerHTML = this.value;
+    }
+
+    var sliderAttackS = document.getElementById("attackS_Range");
+    var outputAttackS = document.getElementById("attackS");
+    outputAttackS.innerHTML = sliderAttackS.value;
+    sliderAttackS.oninput = function() {
+      outputAttackS.innerHTML = this.value;
     }
     
   </script>
